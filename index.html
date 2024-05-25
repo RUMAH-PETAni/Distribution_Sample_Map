@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Distribution of Sample</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/LandStatus_2.js"></script>
+        <script src="data/ForestFarmerGroup_3.js"></script>
+        <script src="data/FarmsBoundaries_4.js"></script>
+        <script src="data/Respondents_5.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-5.519245394392224,104.39976591032153],[-5.479262560022119,104.48175318304676]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix(' <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        document.querySelector(".leaflet-popup-pane").addEventListener("load", function(event) {
+          var tagName = event.target.tagName,
+            popup = map._popup;
+          // Also check if flag is already set.
+          if (tagName === "IMG" && popup && !popup._updated) {
+            popup._updated = true; // Set flag to prevent looping.
+            popup.update();
+          }
+        }, true);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_EsriSatellite_0');
+        map.getPane('pane_EsriSatellite_0').style.zIndex = 400;
+        var layer_EsriSatellite_0 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            pane: 'pane_EsriSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 17
+        });
+        layer_EsriSatellite_0;
+        map.addLayer(layer_EsriSatellite_0);
+        map.createPane('pane_EsriTopoWorld_1');
+        map.getPane('pane_EsriTopoWorld_1').style.zIndex = 401;
+        var layer_EsriTopoWorld_1 = L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            pane: 'pane_EsriTopoWorld_1',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_EsriTopoWorld_1;
+        map.addLayer(layer_EsriTopoWorld_1);
+        function pop_LandStatus_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kode'] !== null ? autolinker.link(feature.properties['Kode'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Luas'] !== null ? autolinker.link(feature.properties['Luas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_LandStatus_2_0(feature) {
+            switch(String(feature.properties['Nama'])) {
+                case 'Hutan Lindung':
+                    return {
+                pane: 'pane_LandStatus_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(2,173,0,0.5019607843137255)',
+                interactive: true,
+            }
+                    break;
+                case 'Hutan Produksi':
+                    return {
+                pane: 'pane_LandStatus_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,0,0.5019607843137255)',
+                interactive: true,
+            }
+                    break;
+                case 'Hutan Produksi Terbatas':
+                    return {
+                pane: 'pane_LandStatus_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,242,0,0.5019607843137255)',
+                interactive: true,
+            }
+                    break;
+                case 'Kawasan Pelestarian dan Konservasi Alam':
+                    return {
+                pane: 'pane_LandStatus_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(173,63,255,0.5019607843137255)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_LandStatus_2',
+                stroke: false,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_LandStatus_2');
+        map.getPane('pane_LandStatus_2').style.zIndex = 402;
+        map.getPane('pane_LandStatus_2').style['mix-blend-mode'] = 'normal';
+        var layer_LandStatus_2 = new L.geoJson(json_LandStatus_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LandStatus_2',
+            layerName: 'layer_LandStatus_2',
+            pane: 'pane_LandStatus_2',
+            onEachFeature: pop_LandStatus_2,
+            style: style_LandStatus_2_0,
+        });
+        bounds_group.addLayer(layer_LandStatus_2);
+        map.addLayer(layer_LandStatus_2);
+        function pop_ForestFarmerGroup_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Id'] !== null ? autolinker.link(feature.properties['Id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KTH'] !== null ? autolinker.link(feature.properties['KTH'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Luas'] !== null ? autolinker.link(feature.properties['Luas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_ForestFarmerGroup_3_0() {
+            return {
+                pane: 'pane_ForestFarmerGroup_3',
+                opacity: 1,
+                color: 'rgba(53,121,177,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ForestFarmerGroup_3');
+        map.getPane('pane_ForestFarmerGroup_3').style.zIndex = 403;
+        map.getPane('pane_ForestFarmerGroup_3').style['mix-blend-mode'] = 'normal';
+        var layer_ForestFarmerGroup_3 = new L.geoJson(json_ForestFarmerGroup_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ForestFarmerGroup_3',
+            layerName: 'layer_ForestFarmerGroup_3',
+            pane: 'pane_ForestFarmerGroup_3',
+            onEachFeature: pop_ForestFarmerGroup_3,
+            style: style_ForestFarmerGroup_3_0,
+        });
+        bounds_group.addLayer(layer_ForestFarmerGroup_3);
+        map.addLayer(layer_ForestFarmerGroup_3);
+        function pop_FarmsBoundaries_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FID_farm_b'] !== null ? autolinker.link(feature.properties['FID_farm_b'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Count_'] !== null ? autolinker.link(feature.properties['Count_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_FarmsBoundaries_4_0() {
+            return {
+                pane: 'pane_FarmsBoundaries_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '4.0,2.0',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FarmsBoundaries_4');
+        map.getPane('pane_FarmsBoundaries_4').style.zIndex = 404;
+        map.getPane('pane_FarmsBoundaries_4').style['mix-blend-mode'] = 'normal';
+        var layer_FarmsBoundaries_4 = new L.geoJson(json_FarmsBoundaries_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FarmsBoundaries_4',
+            layerName: 'layer_FarmsBoundaries_4',
+            pane: 'pane_FarmsBoundaries_4',
+            onEachFeature: pop_FarmsBoundaries_4,
+            style: style_FarmsBoundaries_4_0,
+        });
+        bounds_group.addLayer(layer_FarmsBoundaries_4);
+        map.addLayer(layer_FarmsBoundaries_4);
+        function pop_Respondents_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Respondent\'s Name</th>\
+                        <td class="visible-with-data" id="Respondent">' + (feature.properties['Respondent'] !== null ? autolinker.link(feature.properties['Respondent'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Farm\'s Size (ha)</th>\
+                        <td class="visible-with-data" id="Farm_Size">' + (feature.properties['Farm_Size'] !== null ? autolinker.link(feature.properties['Farm_Size'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Capabilty Class</th>\
+                        <td class="visible-with-data" id="Capability">' + (feature.properties['Capability'] !== null ? autolinker.link(feature.properties['Capability'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Opportunity Class</th>\
+                        <td class="visible-with-data" id="Opportunit">' + (feature.properties['Opportunit'] !== null ? autolinker.link(feature.properties['Opportunit'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Motivation Class</th>\
+                        <td class="visible-with-data" id="Motivation">' + (feature.properties['Motivation'] !== null ? autolinker.link(feature.properties['Motivation'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Behavior Class</th>\
+                        <td class="visible-with-data" id="Behavior">' + (feature.properties['Behavior'] !== null ? autolinker.link(feature.properties['Behavior'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Coffee Production Class</th>\
+                        <td class="visible-with-data" id="Coffee_Pro">' + (feature.properties['Coffee_Pro'] !== null ? autolinker.link(feature.properties['Coffee_Pro'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CSA\'s Success Class</th>\
+                        <td class="visible-with-data" id="CSA_s_Succ">' + (feature.properties['CSA_s_Succ'] !== null ? autolinker.link(feature.properties['CSA_s_Succ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Photo URL\'s</th>\
+                        <td class="visible-with-data" id="Photo_URL_">' + (feature.properties['Photo_URL_'] !== null ? autolinker.link(feature.properties['Photo_URL_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_Respondents_5_0() {
+            return {
+                pane: 'pane_Respondents_5',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Respondents_5.svg',
+            iconSize: [22.799999999999997, 22.799999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Respondents_5');
+        map.getPane('pane_Respondents_5').style.zIndex = 405;
+        map.getPane('pane_Respondents_5').style['mix-blend-mode'] = 'normal';
+        var layer_Respondents_5 = new L.geoJson(json_Respondents_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Respondents_5',
+            layerName: 'layer_Respondents_5',
+            pane: 'pane_Respondents_5',
+            onEachFeature: pop_Respondents_5,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Respondents_5_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Respondents_5);
+        map.addLayer(layer_Respondents_5);
+            var title = new L.Control();
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Distribution of Sample</h2>';
+            };
+            title.addTo(map);
+        var baseMaps = [
+            {label: "Esri Topo World", layer: layer_EsriTopoWorld_1},
+            {label: "Esri Satellite", layer: layer_EsriSatellite_0}]
+        var overlaysTree = [
+            {label: '<img src="legend/Respondents_5.png" /> Respondent\'s', layer: layer_Respondents_5},
+            {label: '<img src="legend/FarmsBoundaries_4.png" /> Farm\'s Boundaries', layer: layer_FarmsBoundaries_4},
+            {label: '<img src="legend/ForestFarmerGroup_3.png" /> Forest Farmer Group', layer: layer_ForestFarmerGroup_3},
+            {label: 'Land Status<br /><table><tr><td style="text-align: center;"><img src="legend/LandStatus_2_HutanLindung0.png" /></td><td>Hutan Lindung</td></tr><tr><td style="text-align: center;"><img src="legend/LandStatus_2_HutanProduksi1.png" /></td><td>Hutan Produksi</td></tr><tr><td style="text-align: center;"><img src="legend/LandStatus_2_HutanProduksiTerbatas2.png" /></td><td>Hutan Produksi Terbatas</td></tr><tr><td style="text-align: center;"><img src="legend/LandStatus_2_KawasanPelestariandanKonservasiAlam3.png" /></td><td>Kawasan Pelestarian dan Konservasi Alam</td></tr><tr><td style="text-align: center;"><img src="legend/LandStatus_2_4.png" /></td><td></td></tr></table>', layer: layer_LandStatus_2},
+            ]
+
+            
+        var lay = L.control.layers.tree(baseMaps, overlaysTree, {
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_LandStatus_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-weight: bold; font-style: italic; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LandStatus_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_ForestFarmerGroup_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['KTH'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['KTH']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_ForestFarmerGroup_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Capability": "str","Opportunit": "str","Motivation": "str","Behavior": "str","Coffee_Pro": "str","CSA_s_Succ": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+        var i = 0;
+        layer_LandStatus_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Nama'] !== null?String('<div style="color: #323232; font-size: 10pt; font-weight: bold; font-style: italic; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LandStatus_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_ForestFarmerGroup_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['KTH'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['KTH']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_ForestFarmerGroup_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Capability = document.createElement('div');
+            div_Capability.id = "div_Capability";
+            div_Capability.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Capability);
+            sel_Capability = document.createElement('select');
+            sel_Capability.multiple = true;
+            sel_Capability.size = 3;
+            sel_Capability.id = "sel_Capability";
+            var Capability_options_str = "<option value='' unselected></option>";
+            sel_Capability.onchange = function(){filterFunc()};
+            Capability_options_str  += '<option value="High">High</option>';
+           
+            Capability_options_str  += '<option value="Medium">Medium</option>';
+            Capability_options_str  += '<option value="Low">Low</option>';
+            sel_Capability.innerHTML = Capability_options_str;
+            div_Capability.appendChild(sel_Capability);
+            var lab_Capability = document.createElement('div');
+            lab_Capability.innerHTML = 'Capability';
+            lab_Capability.className = 'filterlabel';
+            div_Capability.appendChild(lab_Capability);
+            var reset_Capability = document.createElement('div');
+            reset_Capability.innerHTML = 'clear filter';
+            reset_Capability.className = 'filterlabel';
+            reset_Capability.onclick = function() {
+                var options = document.getElementById("sel_Capability").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Capability.appendChild(reset_Capability);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Opportunit = document.createElement('div');
+            div_Opportunit.id = "div_Opportunit";
+            div_Opportunit.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Opportunit);
+            sel_Opportunit = document.createElement('select');
+            sel_Opportunit.multiple = true;
+            sel_Opportunit.size = 3;
+            sel_Opportunit.id = "sel_Opportunit";
+            var Opportunit_options_str = "<option value='' unselected></option>";
+            sel_Opportunit.onchange = function(){filterFunc()};
+            Opportunit_options_str  += '<option value="High">High</option>';
+          
+            Opportunit_options_str  += '<option value="Medium">Medium</option>';
+            Opportunit_options_str  += '<option value="Low">Low</option>';
+            sel_Opportunit.innerHTML = Opportunit_options_str;
+            div_Opportunit.appendChild(sel_Opportunit);
+            var lab_Opportunit = document.createElement('div');
+            lab_Opportunit.innerHTML = 'Opportunity';
+            lab_Opportunit.className = 'filterlabel';
+            div_Opportunit.appendChild(lab_Opportunit);
+            var reset_Opportunit = document.createElement('div');
+            reset_Opportunit.innerHTML = 'clear filter';
+            reset_Opportunit.className = 'filterlabel';
+            reset_Opportunit.onclick = function() {
+                var options = document.getElementById("sel_Opportunit").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Opportunit.appendChild(reset_Opportunit);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Motivation = document.createElement('div');
+            div_Motivation.id = "div_Motivation";
+            div_Motivation.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Motivation);
+            sel_Motivation = document.createElement('select');
+            sel_Motivation.multiple = true;
+            sel_Motivation.size = 3;
+            sel_Motivation.id = "sel_Motivation";
+            var Motivation_options_str = "<option value='' unselected></option>";
+            sel_Motivation.onchange = function(){filterFunc()};
+            Motivation_options_str  += '<option value="High">High</option>';
+         
+            Motivation_options_str  += '<option value="Medium">Medium</option>';
+            Motivation_options_str  += '<option value="Low">Low</option>';
+            sel_Motivation.innerHTML = Motivation_options_str;
+            div_Motivation.appendChild(sel_Motivation);
+            var lab_Motivation = document.createElement('div');
+            lab_Motivation.innerHTML = 'Motivation';
+            lab_Motivation.className = 'filterlabel';
+            div_Motivation.appendChild(lab_Motivation);
+            var reset_Motivation = document.createElement('div');
+            reset_Motivation.innerHTML = 'clear filter';
+            reset_Motivation.className = 'filterlabel';
+            reset_Motivation.onclick = function() {
+                var options = document.getElementById("sel_Motivation").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Motivation.appendChild(reset_Motivation);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Behavior = document.createElement('div');
+            div_Behavior.id = "div_Behavior";
+            div_Behavior.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Behavior);
+            sel_Behavior = document.createElement('select');
+            sel_Behavior.multiple = true;
+            sel_Behavior.size = 3;
+            sel_Behavior.id = "sel_Behavior";
+            var Behavior_options_str = "<option value='' unselected></option>";
+            sel_Behavior.onchange = function(){filterFunc()};
+            Behavior_options_str  += '<option value="High">High</option>';
+            
+            Behavior_options_str  += '<option value="Medium">Medium</option>';
+            Behavior_options_str  += '<option value="Low">Low</option>';
+            sel_Behavior.innerHTML = Behavior_options_str;
+            div_Behavior.appendChild(sel_Behavior);
+            var lab_Behavior = document.createElement('div');
+            lab_Behavior.innerHTML = 'Behavior';
+            lab_Behavior.className = 'filterlabel';
+            div_Behavior.appendChild(lab_Behavior);
+            var reset_Behavior = document.createElement('div');
+            reset_Behavior.innerHTML = 'clear filter';
+            reset_Behavior.className = 'filterlabel';
+            reset_Behavior.onclick = function() {
+                var options = document.getElementById("sel_Behavior").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Behavior.appendChild(reset_Behavior);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Coffee_Pro = document.createElement('div');
+            div_Coffee_Pro.id = "div_Coffee_Pro";
+            div_Coffee_Pro.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Coffee_Pro);
+            sel_Coffee_Pro = document.createElement('select');
+            sel_Coffee_Pro.multiple = true;
+            sel_Coffee_Pro.size = 3;
+            sel_Coffee_Pro.id = "sel_Coffee_Pro";
+            var Coffee_Pro_options_str = "<option value='' unselected></option>";
+            sel_Coffee_Pro.onchange = function(){filterFunc()};
+            Coffee_Pro_options_str  += '<option value="High">High</option>';
+           
+            Coffee_Pro_options_str  += '<option value="Medium">Medium</option>';
+            Coffee_Pro_options_str  += '<option value="Low">Low</option>';
+            sel_Coffee_Pro.innerHTML = Coffee_Pro_options_str;
+            div_Coffee_Pro.appendChild(sel_Coffee_Pro);
+            var lab_Coffee_Pro = document.createElement('div');
+            lab_Coffee_Pro.innerHTML = 'Coffee Production';
+            lab_Coffee_Pro.className = 'filterlabel';
+            div_Coffee_Pro.appendChild(lab_Coffee_Pro);
+            var reset_Coffee_Pro = document.createElement('div');
+            reset_Coffee_Pro.innerHTML = 'clear filter';
+            reset_Coffee_Pro.className = 'filterlabel';
+            reset_Coffee_Pro.onclick = function() {
+                var options = document.getElementById("sel_Coffee_Pro").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Coffee_Pro.appendChild(reset_Coffee_Pro);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_CSA_s_Succ = document.createElement('div');
+            div_CSA_s_Succ.id = "div_CSA_s_Succ";
+            div_CSA_s_Succ.className= "filterselect";
+            document.getElementById("menu").appendChild(div_CSA_s_Succ);
+            sel_CSA_s_Succ = document.createElement('select');
+            sel_CSA_s_Succ.multiple = true;
+            sel_CSA_s_Succ.size = 3;
+            sel_CSA_s_Succ.id = "sel_CSA_s_Succ";
+            var CSA_s_Succ_options_str = "<option value='' unselected></option>";
+            sel_CSA_s_Succ.onchange = function(){filterFunc()};
+            CSA_s_Succ_options_str  += '<option value="High">High</option>';
+            
+            CSA_s_Succ_options_str  += '<option value="Medium">Medium</option>';
+            CSA_s_Succ_options_str  += '<option value="Low">Low</option>';
+            sel_CSA_s_Succ.innerHTML = CSA_s_Succ_options_str;
+            div_CSA_s_Succ.appendChild(sel_CSA_s_Succ);
+            var lab_CSA_s_Succ = document.createElement('div');
+            lab_CSA_s_Succ.innerHTML = 'CSAs Success';
+            lab_CSA_s_Succ.className = 'filterlabel';
+            div_CSA_s_Succ.appendChild(lab_CSA_s_Succ);
+            var reset_CSA_s_Succ = document.createElement('div');
+            reset_CSA_s_Succ.innerHTML = 'clear filter';
+            reset_CSA_s_Succ.className = 'filterlabel';
+            reset_CSA_s_Succ.onclick = function() {
+                var options = document.getElementById("sel_CSA_s_Succ").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_CSA_s_Succ.appendChild(reset_CSA_s_Succ);
+        resetLabels([layer_LandStatus_2,layer_ForestFarmerGroup_3]);
+        map.on("zoomend", function(){
+            resetLabels([layer_LandStatus_2,layer_ForestFarmerGroup_3]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_LandStatus_2,layer_ForestFarmerGroup_3]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_LandStatus_2,layer_ForestFarmerGroup_3]);
+        });
+        L.Control.Watermark=L.Control.extend({
+                onAdd:function(map){
+                    var img = L.DomUtil.create('img');
+                    img.src = 'assets/rumahpetani_logo.svg';
+                    img.style.width = '100px';
+                        
+                    return img;
+                    },
+                    onRemove:function(map){},
+                    });
+                    L.control.watermark = function(opts){
+                        return new L.Control.Watermark(opts);
+                        }
+                    L.control.watermark({position:'bottomleft'}).addTo(map);
+                        
+
+        </script>
+    </body>
+</html>
